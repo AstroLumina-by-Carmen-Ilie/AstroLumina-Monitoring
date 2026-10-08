@@ -218,7 +218,7 @@ is the GitOps path, while this repo remains the plain-manifest source of truth.
 ### Step 6: Application metrics (AstroLumina APIs)
 
 The three Node APIs (astrology, booking, payment) expose Prometheus metrics
-on `GET /metrics` (added with `prom-client`: Node.js defaults plus
+on `GET /metrics` (added with `@prometheus-io/client`: Node.js defaults plus
 `http_requests_total` and `http_request_duration_seconds`, all carrying a
 constant `service="<api>"` label). The frontend is static Nginx with no
 metrics endpoint — its traffic is visible via the Traefik metrics instead.
