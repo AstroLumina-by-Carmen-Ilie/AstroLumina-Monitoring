@@ -214,3 +214,35 @@ NOTE (repo strategy): this repo stays Kustomize forever. Real Helm charts for
 our apps will live in the separate AstroLumina-Helm repo and get consumed
 declaratively (RKE2 `HelmChart`/`HelmChartConfig`, later ArgoCD/Flux) — that
 is the GitOps path, while this repo remains the plain-manifest source of truth.
+
+### Step 6: Application metrics (AstroLumina APIs)
+
+The three Node APIs (astrology, booking, payment) expose Prometheus metrics
+on `GET /metrics` (added with `@prometheus-io/client`: Node.js defaults plus
+`http_requests_total` and `http_request_duration_seconds`, all carrying a
+constant `service="<api>"` label). The frontend is static Nginx with no
+metrics endpoint — its traffic is visible via the Traefik metrics instead.
+
+Discovery wiring lives in `servicemonitors/` (one file per environment,
+applied with `kubectl apply -k servicemonitors/` from this repo root on the
+CP). Each `ServiceMonitor` carries the `release: monitoring` label, which is
+what the Prometheus `serviceMonitorSelector` (chart default for a release
+called `monitoring`) requires — without it Prometheus ignores the object.
+Staging/production target the `*-live` Services so scrapes survive blue/green
+flips. Pickup is automatic at the next discovery refresh (1-2 minutes), no
+Prometheus restart needed.
+
+Starter queries (Grafana Explore or Prometheus UI):
+
+```promql
+# Request rate per service (all envs)
+sum by (service) (rate(http_requests_total[5m]))
+
+# 95th-percentile latency per route (production booking)
+histogram_quantile(0.95, sum by (route, le) (rate(http_request_duration_seconds_bucket{service="booking-api"}[5m])))
+
+# Error ratio per service
+sum by (service) (rate(http_requests_total{status=~"5.."}[5m]))
+/
+sum by (service) (rate(http_requests_total[5m]))
+```

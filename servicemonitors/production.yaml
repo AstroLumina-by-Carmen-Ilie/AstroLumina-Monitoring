@@ -1,0 +1,70 @@
+---
+# Scrapes the production LIVE color (namespace astrolumina-prod). Targeting
+# the *-live Services (not blue/green directly) keeps the scrape target
+# stable across blue/green flips. The frontend is intentionally absent: it is
+# static Nginx with no metrics endpoint.
+# The `release: monitoring` label must match the Prometheus
+# serviceMonitorSelector (default of the kube-prometheus-stack release
+# called `monitoring`); without it Prometheus ignores these objects.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: astrolumina-production-astrology-api
+  namespace: monitoring
+  labels:
+    release: monitoring
+    app.kubernetes.io/part-of: astrolumina
+spec:
+  namespaceSelector:
+    matchNames:
+      - astrolumina-prod
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: astrology-api
+      app.kubernetes.io/component: astrology-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: astrolumina-production-booking-api
+  namespace: monitoring
+  labels:
+    release: monitoring
+    app.kubernetes.io/part-of: astrolumina
+spec:
+  namespaceSelector:
+    matchNames:
+      - astrolumina-prod
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: booking-api
+      app.kubernetes.io/component: booking-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: astrolumina-production-payment-api
+  namespace: monitoring
+  labels:
+    release: monitoring
+    app.kubernetes.io/part-of: astrolumina
+spec:
+  namespaceSelector:
+    matchNames:
+      - astrolumina-prod
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment-api
+      app.kubernetes.io/component: payment-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
