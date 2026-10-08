@@ -1,0 +1,69 @@
+---
+# Scrapes the development APIs (namespace astrolumina-dev) on their /metrics
+# endpoints. The frontend is intentionally absent: it is static Nginx with no
+# metrics endpoint (its traffic is visible via the Traefik metrics instead).
+# The `release: monitoring` label must match the Prometheus
+# serviceMonitorSelector (default of the kube-prometheus-stack release
+# called `monitoring`); without it Prometheus ignores these objects.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: astrolumina-dev-astrology-api
+  namespace: monitoring
+  labels:
+    release: monitoring
+    app.kubernetes.io/part-of: astrolumina
+spec:
+  namespaceSelector:
+    matchNames:
+      - astrolumina-dev
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: astrology-api
+      app.kubernetes.io/component: astrology-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: astrolumina-dev-booking-api
+  namespace: monitoring
+  labels:
+    release: monitoring
+    app.kubernetes.io/part-of: astrolumina
+spec:
+  namespaceSelector:
+    matchNames:
+      - astrolumina-dev
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: booking-api
+      app.kubernetes.io/component: booking-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: astrolumina-dev-payment-api
+  namespace: monitoring
+  labels:
+    release: monitoring
+    app.kubernetes.io/part-of: astrolumina
+spec:
+  namespaceSelector:
+    matchNames:
+      - astrolumina-dev
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment-api
+      app.kubernetes.io/component: payment-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

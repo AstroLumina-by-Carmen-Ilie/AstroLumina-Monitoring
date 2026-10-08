@@ -1,0 +1,11 @@
+---
+# Applies all AstroLumina ServiceMonitors with one command (run on the CP):
+# kubectl apply -k servicemonitors/
+# Prometheus picks them up automatically at the next discovery refresh
+# (1-2 minutes), no restart needed.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - development.yaml
+  - staging.yaml
+  - production.yaml
